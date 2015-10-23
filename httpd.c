@@ -495,7 +495,7 @@ void echo_func(int client) {
     printf("return from server = %s\n", buf);
     write(client, buf, sizeof(buf)); 
     send(client, buf, sizeof(buf), 0);
-    close(client);
+    //close(client);
 
 }
 
@@ -521,14 +521,26 @@ int main(int argc, char *argv[])
     {
         client_sock = accept(server_sock, (struct sockaddr *)&client_name, &client_name_len);
         if (client_sock == -1) {
-            error_die("accept");
+            perror("accept");
         } else {
             printf("accept client socket: %d\n", client_sock);
         }
+        int n = 0;
+        char buf[2048];
+        memset(buf, '\0', sizeof(buf));
+        // revc
+        while((n = recv(client_sock, buf, 100, 0)) > 0) {
+            printf("num of recieve bytes: %d\n", n);
+        //    read(client_sock, buf, sizeof(buf)); 
+            str_rev(buf, 0, strlen(buf)-3);
+            printf("return from server = %s\n", buf);
+            write(client_sock, buf, n); 
+            //send(client_sock, buf, n, 0);
+        }
         /* accept_request(client_sock); */
         //if (pthread_create(&newthread , NULL, (void *)accept_request, (void *)&client_sock) != 0)
-        if (pthread_create(&newthread , NULL, (void *)echo_func, client_sock) != 0)
-            error_die("pthread_create");
+        //if (pthread_create(&newthread , NULL, (void *)echo_func, client_sock) != 0)
+        //    error_die("pthread_create");
     }
 
     close(server_sock);
